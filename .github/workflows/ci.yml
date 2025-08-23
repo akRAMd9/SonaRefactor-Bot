@@ -40,9 +40,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: >
-            -Dsonar.organization=<YOUR_ORG_KEY>
-            -Dsonar.projectKey=<YOUR_PROJECT_KEY>
-
+            -Dsonar.organization=sonarefactor
+            -Dsonar.projectKey=sonarefactor_sonarfactor
+            
       - name: Fetch Sonar issues (optional for your PR summary)
         env:
           SONAR_HOST_URL: https://sonarcloud.io

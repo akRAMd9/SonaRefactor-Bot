@@ -1,4 +1,3 @@
-
 name: ci
 
 on:
@@ -14,7 +13,10 @@ jobs:
   build-test-scan:
     runs-on: ubuntu-latest
     steps:
+      # ⬇️ fetch full history + all refs, not shallow
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -24,20 +26,26 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run tests
-        run: PYTHONPATH=. pytest -q --maxfail=1
+        run: pytest -q --maxfail=1
 
+      # (optional) belt-and-suspenders: make sure 'main' is present locally
+      - name: Ensure base branch available
+        run: git fetch origin main:main
 
-      
- 
-      - name: SonarQube scan
-        uses: sonarsource/sonarqube-scan-action@v2
+      # ⬇️ SonarCloud scan (use the SonarCloud action)
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
         env:
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=<YOUR_ORG_KEY>
+            -Dsonar.projectKey=<YOUR_PROJECT_KEY>
 
-      - name: Fetch Sonar issues
+      - name: Fetch Sonar issues (optional for your PR summary)
         env:
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_HOST_URL: https://sonarcloud.io
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: python scripts/fetch_sonar_issues.py
 
@@ -47,5 +55,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: ci-artifacts
-          path: |
-            issues.json
+          path: issues.json

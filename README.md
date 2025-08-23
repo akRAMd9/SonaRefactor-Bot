@@ -49,3 +49,8 @@ pytest -q
 ## Notes
 - This MVP only **comments** results (no auto-fix). Start simple, then add auto-fix later.
 - Keep commits small. Use PRs so the bot has something to comment on.
+
+
+
+Test run for SonarCloud
+

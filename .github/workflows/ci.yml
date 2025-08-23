@@ -26,7 +26,8 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run tests
-        run: pytest -q --maxfail=1
+        run: PYTHONPATH=. pytest -q --maxfail=1
+
 
       # (optional) belt-and-suspenders: make sure 'main' is present locally
       - name: Ensure base branch available

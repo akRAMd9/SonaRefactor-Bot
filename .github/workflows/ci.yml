@@ -62,7 +62,7 @@ jobs:
       - name: AI Reviewer (Gemini, comment-only)
         env:
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
-          LLM_MODEL: gemini-1.5-flash
+          LLM_MODEL: gemini-2.5-flash
         run: python scripts/llm_reviewer.py
 
       - uses: actions/upload-artifact@v4

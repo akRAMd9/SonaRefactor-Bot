@@ -1,9 +1,9 @@
 
 import os, json, textwrap, requests
 
-API_KEY = os.environ.get("LLM_API_KEY")
+LLM_API_KEY = os.environ.get("LLM_API_KEY")
 MODEL = os.environ.get("LLM_MODEL", "gemini-2.5-flash")  # or any model you prefer
-URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={API_KEY}"  # swap if using another provider
+URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={LLM_API_KEY}"  # swap if using another provider
 
 def ask_gemini(prompt: str) -> str:
     if not API_KEY:

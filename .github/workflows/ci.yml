@@ -43,12 +43,13 @@ jobs:
         run: |
           python scripts/fetch_sonar_issues.py
           echo "---- issues.json head ----"
-          python - <<'PY'
+          python -c "
 import json, os
-p="issues.json"
-print("exists:", os.path.exists(p), "size:", os.path.getsize(p) if os.path.exists(p) else 0)
+p='issues.json'
+print('exists:', os.path.exists(p), 'size:', os.path.getsize(p) if os.path.exists(p) else 0)
 if os.path.exists(p):
     print(json.dumps(json.load(open(p))[:3], indent=2))  # show first few issues
+"
 PY
 
       - name: AI Reviewer (comment-only)

@@ -70,19 +70,7 @@ jobs:
         with:
           name: sonar-issues
           path: issues.json
-      - name: Save Gemini suggestions to file
-        run: |
-          echo "${{ steps.llm.outputs.markdown }}" > llm_suggestions.md
-
-      - name: Comment Gemini suggestions on PR
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-         token: ${{ secrets.GITHUB_TOKEN }}
-         issue-number: ${{ github.event.pull_request.number }}
-         body-file: llm_suggestions.md
-
-          
+      
     
       - name: Minimal Auto-Fix (Gemini)
         if: github.event_name == 'pull_request'

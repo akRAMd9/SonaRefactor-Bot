@@ -6,7 +6,7 @@ MODEL = os.environ.get("LLM_MODEL", "gemini-2.5-flash")  # or any model you pref
 URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={LLM_API_KEY}"  # swap if using another provider
 
 def ask_gemini(prompt: str) -> str:
-    if not API_KEY:
+    if not LLM_API_KEY:
         return "(No GEMINI_API_KEY set)"
     payload = {
         "contents": [{

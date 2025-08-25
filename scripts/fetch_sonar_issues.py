@@ -4,7 +4,7 @@ import os, json, sys, requests
 def main():
     host = os.environ.get("SONAR_HOST_URL", "").rstrip("/")
     token = os.environ.get("SONAR_TOKEN", "")
-    project = "sonarefactor-demo"
+    project = "akRAMd9_SonaRefactor-Bot"
 
     if not host or not token:
         print("Missing SONAR_HOST_URL or SONAR_TOKEN")

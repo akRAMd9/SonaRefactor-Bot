@@ -33,6 +33,13 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Export SONAR_PROJECT_KEY
+        run: |
+          KEY=$(grep -E '^sonar\.projectKey=' sonar-project.properties | sed 's/sonar\.projectKey=//')
+          echo "SONAR_PROJECT_KEY=$KEY" >> $GITHUB_ENV
+
+
+
       - name: Fetch Sonar issues (API)
         env:
           SONAR_HOST_URL: https://sonarcloud.io

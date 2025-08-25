@@ -32,18 +32,37 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      
       - name: Fetch Sonar issues (API)
         env:
           SONAR_HOST_URL: https://sonarcloud.io
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: python scripts/fetch_sonar_issues.py
+          SONAR_PROJECT_KEY: akRAMd9_SonaRefactor-Bot  #
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          python scripts/fetch_sonar_issues.py
+          echo "---- issues.json head ----"
+          python - <<'PY'
+import json, os
+p="issues.json"
+print("exists:", os.path.exists(p), "size:", os.path.getsize(p) if os.path.exists(p) else 0)
+if os.path.exists(p):
+    print(json.dumps(json.load(open(p))[:3], indent=2))  # show first few issues
+PY
 
       - name: AI Reviewer (comment-only)
         env:
-          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          LLM_MODEL: gemini-1.5-flash
         run: python scripts/llm_reviewer.py
 
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sonar-issues
+          path: issues.json
 
-      # (optional) your summary step
+
       - name: Post summary to PR
         run: python scripts/pr_commenter.py || true

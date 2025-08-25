@@ -53,8 +53,8 @@ PY
 
       - name: AI Reviewer (comment-only)
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          LLM_MODEL: gemini-1.5-flash
+          GEMINI_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_MODEL: gemini-2.5-flash
         run: python scripts/llm_reviewer.py
 
       - uses: actions/upload-artifact@v4

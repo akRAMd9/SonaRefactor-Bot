@@ -1,3 +1,4 @@
+#fixed api error in api call
 # NOTE: this file is intentionally "bad" to trigger SonarCloud findings.
 
 # 1) Mutable default arg (code smell)

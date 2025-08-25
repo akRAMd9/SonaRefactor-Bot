@@ -70,6 +70,14 @@ jobs:
         with:
           name: sonar-issues
           path: issues.json
+    
+      - name: Minimal Auto-Fix (Gemini)
+        if: github.event_name == 'pull_request'
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_MODEL: gemini-2.5-flash
+        run: python scripts/llm_autofix_min.py
+
 
       - name: Post summary to PR
         run: python scripts/pr_commenter.py || true

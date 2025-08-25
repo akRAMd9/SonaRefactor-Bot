@@ -61,7 +61,7 @@ jobs:
 
       - name: AI Reviewer (Gemini, comment-only)
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          LLM_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           LLM_MODEL: gemini-1.5-flash
         run: python scripts/llm_reviewer.py
 

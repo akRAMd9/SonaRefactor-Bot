@@ -45,23 +45,24 @@ jobs:
         env:
           SONAR_HOST_URL: https://sonarcloud.io
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_PROJECT_KEY: akRAMd9_SonaRefactor-Bot   
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           python scripts/fetch_sonar_issues.py
-          echo "---- issues.json head ----"
+          echo "---- issues.json quick peek ----"
           python - <<'PY'
-          import json, os
-          p = "issues.json"
+          import os, json
+          p="issues.json"
           print("exists:", os.path.exists(p), "size:", os.path.getsize(p) if os.path.exists(p) else 0)
-          if os.path.exists(p):
-              print(json.dumps(json.load(open(p))[:3], indent=2))
+          if os.path.exists(p) and os.path.getsize(p)>0:
+              data=json.load(open(p))
+              print("count:", len(data))
+              print(json.dumps(data[:2], indent=2))
           PY
 
       - name: AI Reviewer (Gemini, comment-only)
         env:
-          GEMINI_API_KEY: ${{ secrets.LLM_API_KEY }}  
-          LLM_MODEL: gemini-2.5-flash                    
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          LLM_MODEL: gemini-1.5-flash
         run: python scripts/llm_reviewer.py
 
       - uses: actions/upload-artifact@v4

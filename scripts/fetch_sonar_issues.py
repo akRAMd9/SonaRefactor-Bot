@@ -1,44 +1,54 @@
-import os, sys, json, requests
+
+import os, re, json, sys, requests
 
 SONAR_HOST_URL = os.environ.get("SONAR_HOST_URL", "https://sonarcloud.io").rstrip("/")
-SONAR_TOKEN = os.environ["SONAR_TOKEN"]
-PROJECT_KEY = os.environ.get("akRAMd9_SonaRefactor-Bot")
-PR_NUMBER = os.environ.get("PR_NUMBER")           
-
+SONAR_TOKEN = os.environ["SONAR_TOKEN"]  # must be set via GitHub Secret
+PR_NUMBER = os.environ.get("PR_NUMBER")  # set on pull_request events
 OUT = "issues.json"
 
-def fetch_page(page, page_size=200):
-    params = {"componentKeys": PROJECT_KEY, "ps": page_size, "p": page}
-    if PR_NUMBER:
-        params["pullRequest"] = PR_NUMBER  # limits to just this PR’s issues
-    r = requests.get(
-        f"{SONAR_HOST_URL}/api/issues/search",
-        params=params,
-        auth=(SONAR_TOKEN, "")
-    )
-    r.raise_for_status()
-    return r.json()
+def read_project_key():
+    path = "sonar-project.properties"
+    if not os.path.exists(path):
+        print("!! sonar-project.properties not found at repo root.")
+        return None
+    txt = open(path, "r", encoding="utf-8").read()
+    m = re.search(r"^sonar\.projectKey\s*=\s*(.+)$", txt, flags=re.M)
+    if m:
+        return m.group(1).strip()
+    print("!! sonar.projectKey not found in sonar-project.properties.")
+    return None
 
-def main():
-    if not PROJECT_KEY:
-        print("Missing SONAR_PROJECT_KEY env var.")
-        sys.exit(0)
-
-    all_issues = []
-    page = 1
+def fetch_issues(project_key):
+    all_issues, page = [], 1
     while True:
-        data = fetch_page(page)
+        params = {"componentKeys": project_key, "ps": 200, "p": page}
+        if PR_NUMBER:
+            params["pullRequest"] = PR_NUMBER
+        r = requests.get(f"{SONAR_HOST_URL}/api/issues/search",
+                         params=params, auth=(SONAR_TOKEN, ""))
+        r.raise_for_status()
+        data = r.json()
         issues = data.get("issues", [])
         all_issues.extend(issues)
         paging = data.get("paging", {})
         if page * paging.get("pageSize", len(issues)) >= paging.get("total", 0):
             break
         page += 1
+    return all_issues
 
-    with open(OUT, "w") as f:
-        json.dump(all_issues, f, indent=2)
-
-    print(f"Saved {len(all_issues)} issues to {OUT} at {os.getcwd()}")
+def main():
+    print(f"[fetch] HOST={SONAR_HOST_URL} PR_NUMBER={PR_NUMBER}")
+    project_key = read_project_key()
+    print(f"[fetch] project_key={project_key!r}")
+    issues = []
+    if project_key:
+        try:
+            issues = fetch_issues(project_key)
+        except Exception as e:
+            print(f"!! Sonar API fetch error: {e}")
+    with open(OUT, "w", encoding="utf-8") as f:
+        json.dump(issues, f, indent=2)
+    print(f"[fetch] wrote {len(issues)} issues to {OUT} (cwd={os.getcwd()})")
 
 if __name__ == "__main__":
     main()

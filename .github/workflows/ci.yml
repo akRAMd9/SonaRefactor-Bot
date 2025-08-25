@@ -32,7 +32,17 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-       
+      - name: Fetch Sonar issues (API)
+        env:
+          SONAR_HOST_URL: https://sonarcloud.io
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: python scripts/fetch_sonar_issues.py
+
+      - name: AI Reviewer (comment-only)
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+        run: python scripts/llm_reviewer.py
+
 
       # (optional) your summary step
       - name: Post summary to PR

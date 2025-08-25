@@ -70,8 +70,20 @@ jobs:
         with:
           name: sonar-issues
           path: issues.json
+
+      - name: Post AI review as PR comment
+        if: ${{ github.event.pull_request.number }}
+        env:
+         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+         PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+            body="$(tail -n +1 "$GITHUB_STEP_SUMMARY")"
+            if [ -n "$body" ]; then
+             gh api repos/${{ github.repository }}/issues/$PR_NUMBER/comments \
+              -f body="$body" >/dev/null
+            fi
+
       
-    
       - name: Minimal Auto-Fix (Gemini)
         if: github.event_name == 'pull_request'
         env:

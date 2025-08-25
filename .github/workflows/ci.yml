@@ -37,7 +37,7 @@ jobs:
         env:
           SONAR_HOST_URL: https://sonarcloud.io
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_PROJECT_KEY: akRAMd9_SonaRefactor-Bot   # <- your real key
+          SONAR_PROJECT_KEY: akRAMd9_SonaRefactor-Bot   
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           python scripts/fetch_sonar_issues.py
@@ -52,8 +52,8 @@ jobs:
 
       - name: AI Reviewer (Gemini, comment-only)
         env:
-          GEMINI_API_KEY: ${{ secrets.LLM_API_KEY }}   # <-- use this secret name
-          LLM_MODEL: gemini-2.5-flash                     # safe default
+          GEMINI_API_KEY: ${{ secrets.LLM_API_KEY }}  
+          LLM_MODEL: gemini-2.5-flash                    
         run: python scripts/llm_reviewer.py
 
       - uses: actions/upload-artifact@v4

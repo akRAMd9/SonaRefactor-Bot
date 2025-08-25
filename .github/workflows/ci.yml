@@ -33,9 +33,10 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Export SONAR_PROJECT_KEY
+      - name: Export SONAR_PROJECT_KEY from properties
         run: |
           KEY=$(grep -E '^sonar\.projectKey=' sonar-project.properties | sed 's/sonar\.projectKey=//')
+          echo "Detected sonar.projectKey=$KEY"
           echo "SONAR_PROJECT_KEY=$KEY" >> $GITHUB_ENV
 
 

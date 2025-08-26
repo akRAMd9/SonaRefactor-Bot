@@ -1,0 +1,93 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  build-test-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: PYTHONPATH=. pytest -q --maxfail=1
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Export SONAR_PROJECT_KEY from properties
+        run: |
+          KEY=$(grep -E '^sonar\.projectKey=' sonar-project.properties | sed 's/sonar\.projectKey=//')
+          echo "Detected sonar.projectKey=$KEY"
+          echo "SONAR_PROJECT_KEY=$KEY" >> $GITHUB_ENV
+
+      - name: Fetch Sonar issues (API)
+        env:
+          SONAR_HOST_URL: https://sonarcloud.io
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          python scripts/fetch_sonar_issues.py
+          echo "---- issues.json quick peek ----"
+          python - <<'PY'
+          import os, json
+          p="issues.json"
+          print("exists:", os.path.exists(p), "size:", os.path.getsize(p) if os.path.exists(p) else 0)
+          if os.path.exists(p) and os.path.getsize(p)>0:
+              data=json.load(open(p))
+              print("count:", len(data))
+              print(json.dumps(data[:2], indent=2))
+          PY
+
+      - name: AI Reviewer (Gemini, comment-only)
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_MODEL: gemini-2.5-flash
+        run: python scripts/llm_reviewer.py
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sonar-issues
+          path: issues.json
+
+      - name: Post AI review as PR comment
+        if: ${{ github.event.pull_request.number }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          if [ -s "$GITHUB_STEP_SUMMARY" ]; then
+            gh api repos/${{ github.repository }}/issues/$PR_NUMBER/comments \
+              --field body<"$GITHUB_STEP_SUMMARY"
+          else
+            echo "No summary to post"
+          fi
+
+      - name: Minimal Auto-Fix (Gemini)
+        if: github.event_name == 'pull_request'
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_MODEL: gemini-2.5-flash
+        run: python scripts/llm_autofix_min.py
+
+      - name: Post summary to PR
+        run: python scripts/pr_commenter.py || true

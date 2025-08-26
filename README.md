@@ -9,7 +9,7 @@ The goal: **offload repetitive refactoring and minor code smells to AI**, so dev
 
 ---
 
-## 🛠️ What It Does
+##  What It Does
 
 When a pull request is opened, this bot:
 1.  Runs tests via GitHub Actions.
@@ -83,7 +83,7 @@ The logic supports scaling to multiple fixes later — but safety and clarity we
 
 ---
 
-## 🧩 Skills Demonstrated
+##  Skills Demonstrated
 
 This project maps directly to core AI Integration Developer skills:
 -  Integrating LLM APIs into real-world pipelines
@@ -98,9 +98,9 @@ This project maps directly to core AI Integration Developer skills:
 
 ##  Who Built This
 
-Hey — I'm Ak, a student at Toronto Metropolitan University and a self-taught systems builder.  
+Hey!  I'm Akram , a student at Toronto Metropolitan University and a self-taught systems builder.  
 I'm not a 10x engineer (yet), but I build fast, learn deep, and love bringing AI into practical workflows.
 
-This was built as part of my learning journey toward becoming a professional AI Integration Developer — and maybe even a candidate for your team.
+This was built as part of my learning journey toward becoming a professional AI Integration Developer, and maybe even a candidate for your team.
 
-I'm passionate about building things that work in the real world — and this project is a small step toward a bigger vision: **making AI part of the team.**
+I'm passionate about building things that work in the real world, and this project is a small step toward a bigger vision: **making AI part of the team.**

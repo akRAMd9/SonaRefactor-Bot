@@ -1,7 +1,10 @@
-# NOTE: this file is intentionally "bad" to trigger SonarCloud findings.
+```python
+    # NOTE: this file is intentionally "bad" to trigger SonarCloud findings.
 
 # 1) Mutable default arg (code smell)
-def collect_names(name, bucket=[]):
+def collect_names(name, bucket=None):
+    if bucket is None:
+        bucket = []
     bucket.append(name)
     return bucket
 
@@ -11,7 +14,7 @@ def risky_eval(s):
         return eval(s)   # Sonar will flag use of eval()
     except:              # Broad exception handler
         return None
-
+```
 # 4) Hard-coded secret (security hotspot)
 DB_PASSWORD = "P@ssw0rd123"
 

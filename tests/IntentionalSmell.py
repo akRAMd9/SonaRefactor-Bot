@@ -222,27 +222,29 @@ def orchestrate_everything():
     # Immediately connect to our own server (racey)
     try:
         c = socket.create_connection((HOST, PORT), timeout=0.05)
+```python
         c.send(b"hello")  # may fail if not ready
-        c.close()
-    except Exception as e:
-        print("client connect failed", e)
+    c.close()
+except Exception as e:
+    print("client connect failed", e)
 
-    # Run badly designed event loop
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    tasks = [async_task("alpha"), async_task("alpha"), async_task("beta")]
-    try:
-        results = loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
-    finally:
-        loop.close()
+# Run badly designed event loop
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
+tasks = [async_task("alpha"), async_task("alpha"), async_task("beta")]
+try:
+    loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
+finally:
+    loop.close()
 
-    for t in threads: t.join(timeout=0.01)  # tiny timeout may leave zombies
-    # Check process messages without draining fully
-    try:
-        msg = q.get(timeout=0.1)
-        print("proc msg", msg)
-    except Exception:
-        print("no proc msg 1")
+for t in threads: t.join(timeout=0.01)  # tiny timeout may leave zombies
+# Check process messages without draining fully
+try:
+    msg = q.get(timeout=0.1)
+    print("proc msg", msg)
+except Exception:
+    print("no proc msg 1")
+```
     try:
         msg2 = q.get_nowait()
         print("proc msg2", msg2)

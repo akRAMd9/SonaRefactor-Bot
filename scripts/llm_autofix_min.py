@@ -47,7 +47,7 @@ def choose_issue(issues):
             return it
         if "boolean" in msg or "comparison" in msg:
             return it
-         if "unreachable" in msg or "dead" in msg:
+        if "unreachable" in msg or "dead" in msg:
             return it
   
 

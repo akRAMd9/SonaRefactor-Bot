@@ -12,11 +12,14 @@ SAFE_HINTS = [
     "format",
     "style",
     "convention",
-    "dead code",
-    "unreachable",
     "string literal",
-    "comparison to true",
+    "concatenation",
+    "== true",
+    "== false",
+    "unreachable",
+    "dead code",
 ]
+
 def ask_gemini(prompt: str) -> str:
     if not API_KEY:
         raise RuntimeError("No GEMINI_API_KEY / LLM_API_KEY set")
@@ -34,9 +37,21 @@ def choose_issue(issues):
     Prefer small, low-risk issues. If none match SAFE_HINTS, abort instead of touching bigger ones.
     """
     for it in issues:
+
         msg = (it.get("message","") + " " + it.get("rule","")).lower()
         if any(h in msg for h in SAFE_HINTS):
             return it
+
+         # TEMP: Presentation mode — allow more stylistic refactors
+        if "string" in msg or "literal" in msg:
+            return it
+        if "boolean" in msg or "comparison" in msg:
+            return it
+         if "unreachable" in msg or "dead" in msg:
+            return it
+  
+
+    
     return None
 
 def main():
@@ -84,11 +99,17 @@ def main():
     window = "\n".join(lines[start:end])
 
     prompt = textwrap.dedent(f"""
-    You are a highly precise Python code refactoring assistant.
+    You are a highly precise Python refactoring assistant.
 
-    Fix *only* the specific SonarCloud issue described below with the smallest possible change.
-    You may add or remove lines if required to resolve the issue, but do not rewrite unrelated code.
-    Do not change behavior or introduce new logic.
+Fix ONLY the SonarCloud issue described below. You ARE allowed to:
+- Convert string concatenations into Python f-strings if equivalent.
+- Simplify boolean comparisons that are behaviorally identical.
+- Remove unreachable code blocks (e.g., `if False:`).
+- Remove unused variables.
+- Remove redundant parentheses.
+- Remove dead legacy comments that refer to removed code.
+
+Do NOT change program logic. Do NOT add new behavior. Keep the original intent.
 
     Sonar Issue:
     {msg}

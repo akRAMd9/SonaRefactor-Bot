@@ -51,16 +51,16 @@ def main():
 
 
     for issue in safe_issues:
-    file_path = issue.get("component","").split(":")[-1]
-    line_num = issue.get("line", 1)
-    msg = issue.get("message", "(no message)")
-    rule = issue.get("rule", "")
+     file_path = issue.get("component","").split(":")[-1]
+     line_num = issue.get("line", 1)
+     msg = issue.get("message", "(no message)")
+     rule = issue.get("rule", "")
 
-    if not file_path or not os.path.exists(file_path):
-        print(f"Skipping missing file: {file_path}")
-        continue
+     if not file_path or not os.path.exists(file_path):
+         print(f"Skipping missing file: {file_path}")
+         continue
 
-    print(f"🔧 Applying safe fix: {msg} @ {file_path}:{line_num}")
+     print(f"🔧 Applying safe fix: {msg} @ {file_path}:{line_num}")
     
     # (Keep the rest of the fix logic exactly the same)
 

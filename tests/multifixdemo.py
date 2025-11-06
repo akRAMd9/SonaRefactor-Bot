@@ -1,5 +1,6 @@
 import os
 import sys   # unused
+```python
 import json
 
 # old config (legacy)
@@ -8,19 +9,19 @@ import json
 
 def process_data(records, debug=False):
     """Process raw record list into normalized mapping."""
-    
+
     results = {}
-    status = "OK"  # repeated literal
-    
+
     # unreachable legacy block
     if False:
         print("This should never run")  # dead code
-    
+
     for rec in records:
         # redundant parentheses + old string concat
         key = (rec["user"])
         value = "User: " + rec["user"] + " | Score: " + str(rec["score"])
-        
+
+```
         # useless temp variable
         temp = value
         

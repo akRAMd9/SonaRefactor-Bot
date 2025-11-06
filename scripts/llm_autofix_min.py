@@ -5,7 +5,20 @@ MODEL = os.environ.get("LLM_MODEL", "gemini-2.5-flash")
 URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={API_KEY}"
 
 # Only fix low-risk, non-behavioral issues
-SAFE_HINTS = ["unused", "redundant", "docstring", "format", "style", "convention"]
+SAFE_HINTS = [
+    "unused",
+    "redundant",
+    "docstring",
+    "format",
+    "style",
+    "convention",
+    "string literal",
+    "concatenation",
+    "== true",
+    "== false",
+    "unreachable",
+    "dead code",
+]
 
 def ask_gemini(prompt: str) -> str:
     if not API_KEY:
@@ -24,9 +37,21 @@ def choose_issue(issues):
     Prefer small, low-risk issues. If none match SAFE_HINTS, abort instead of touching bigger ones.
     """
     for it in issues:
+
         msg = (it.get("message","") + " " + it.get("rule","")).lower()
         if any(h in msg for h in SAFE_HINTS):
             return it
+
+         # TEMP: Presentation mode — allow more stylistic refactors
+        if "string" in msg or "literal" in msg:
+            return it
+        if "boolean" in msg or "comparison" in msg:
+            return it
+        if "unreachable" in msg or "dead" in msg:
+            return it
+  
+
+    
     return None
 
 def main():
@@ -42,7 +67,7 @@ def main():
     safe_issues = [it for it in issues if choose_issue([it])]
     if not safe_issues:
         print("No safe low-risk issues found; aborting.")
-    sys.exit(0)
+        sys.exit(0)
 
 # Limit how many we fix in one run (for presentation aesthetic)
     safe_issues = safe_issues[:5]
@@ -51,16 +76,16 @@ def main():
 
 
     for issue in safe_issues:
-    file_path = issue.get("component","").split(":")[-1]
-    line_num = issue.get("line", 1)
-    msg = issue.get("message", "(no message)")
-    rule = issue.get("rule", "")
+     file_path = issue.get("component","").split(":")[-1]
+     line_num = issue.get("line", 1)
+     msg = issue.get("message", "(no message)")
+     rule = issue.get("rule", "")
 
-    if not file_path or not os.path.exists(file_path):
-        print(f"Skipping missing file: {file_path}")
-        continue
+     if not file_path or not os.path.exists(file_path):
+         print(f"Skipping missing file: {file_path}")
+         continue
 
-    print(f"🔧 Applying safe fix: {msg} @ {file_path}:{line_num}")
+     print(f"🔧 Applying safe fix: {msg} @ {file_path}:{line_num}")
     
     # (Keep the rest of the fix logic exactly the same)
 
@@ -74,11 +99,17 @@ def main():
     window = "\n".join(lines[start:end])
 
     prompt = textwrap.dedent(f"""
-    You are a highly precise Python code refactoring assistant.
+    You are a highly precise Python refactoring assistant.
 
-    Fix *only* the specific SonarCloud issue described below with the smallest possible change.
-    You may add or remove lines if required to resolve the issue, but do not rewrite unrelated code.
-    Do not change behavior or introduce new logic.
+Fix ONLY the SonarCloud issue described below. You ARE allowed to:
+- Convert string concatenations into Python f-strings if equivalent.
+- Simplify boolean comparisons that are behaviorally identical.
+- Remove unreachable code blocks (e.g., `if False:`).
+- Remove unused variables.
+- Remove redundant parentheses.
+- Remove dead legacy comments that refer to removed code.
+
+Do NOT change program logic. Do NOT add new behavior. Keep the original intent.
 
     Sonar Issue:
     {msg}

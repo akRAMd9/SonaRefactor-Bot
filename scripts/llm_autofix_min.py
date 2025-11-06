@@ -39,15 +39,30 @@ def main():
         print("issues.json empty; nothing to autofix.")
         sys.exit(0)
 
-    issue = choose_issue(issues)
-    if not issue:
-        print("No safe low-risk issue found; aborting.")
-        sys.exit(0)
+    safe_issues = [it for it in issues if choose_issue([it])]
+    if not safe_issues:
+        print("No safe low-risk issues found; aborting.")
+    sys.exit(0)
 
+# Limit how many we fix in one run (for presentation aesthetic)
+    safe_issues = safe_issues[:5]
+    print(f"⚡ Presentation Mode: fixing {len(safe_issues)} issues in one PR")
+    
+
+
+    for issue in safe_issues:
     file_path = issue.get("component","").split(":")[-1]
     line_num = issue.get("line", 1)
     msg = issue.get("message", "(no message)")
     rule = issue.get("rule", "")
+
+    if not file_path or not os.path.exists(file_path):
+        print(f"Skipping missing file: {file_path}")
+        continue
+
+    print(f"🔧 Applying safe fix: {msg} @ {file_path}:{line_num}")
+    
+    # (Keep the rest of the fix logic exactly the same)
 
     if not file_path or not os.path.exists(file_path):
         print(f"File not found: {file_path}")

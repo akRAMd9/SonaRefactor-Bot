@@ -5,8 +5,18 @@ MODEL = os.environ.get("LLM_MODEL", "gemini-2.5-flash")
 URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={API_KEY}"
 
 # Only fix low-risk, non-behavioral issues
-SAFE_HINTS = ["unused", "redundant", "docstring", "format", "style", "convention"]
-
+SAFE_HINTS = [
+    "unused",
+    "redundant",
+    "docstring",
+    "format",
+    "style",
+    "convention",
+    "dead code",
+    "unreachable",
+    "string literal",
+    "comparison to true",
+]
 def ask_gemini(prompt: str) -> str:
     if not API_KEY:
         raise RuntimeError("No GEMINI_API_KEY / LLM_API_KEY set")

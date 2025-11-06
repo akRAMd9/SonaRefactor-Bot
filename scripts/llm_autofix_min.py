@@ -42,7 +42,7 @@ def main():
     safe_issues = [it for it in issues if choose_issue([it])]
     if not safe_issues:
         print("No safe low-risk issues found; aborting.")
-    sys.exit(0)
+        sys.exit(0)
 
 # Limit how many we fix in one run (for presentation aesthetic)
     safe_issues = safe_issues[:5]
